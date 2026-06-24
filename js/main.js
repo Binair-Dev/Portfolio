@@ -172,8 +172,13 @@ let mouse = { x: null, y: null };
 let animId = null;
 
 function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
 }
 resizeCanvas();
 
@@ -195,8 +200,8 @@ window.addEventListener('mousemove', (e) => {
 
 class Particle {
     constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
+        this.x = Math.random() * window.innerWidth;
+        this.y = Math.random() * window.innerHeight;
         this.size = Math.random() * 1.5 + 0.5;
         this.speedX = (Math.random() - 0.5) * 0.3;
         this.speedY = (Math.random() - 0.5) * 0.3;
@@ -205,8 +210,8 @@ class Particle {
     update() {
         this.x += this.speedX;
         this.y += this.speedY;
-        if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-        if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
+        if (this.x < 0 || this.x > window.innerWidth) this.speedX *= -1;
+        if (this.y < 0 || this.y > window.innerHeight) this.speedY *= -1;
 
         // Mouse interaction
         if (mouse.x) {
@@ -256,7 +261,7 @@ function connectParticles() {
 }
 
 function animateParticles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
     particles.forEach(p => { p.update(); p.draw(); });
     connectParticles();
     animId = requestAnimationFrame(animateParticles);
