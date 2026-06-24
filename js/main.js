@@ -176,7 +176,17 @@ function resizeCanvas() {
     canvas.height = window.innerHeight;
 }
 resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+
+let resizeTicking = false;
+window.addEventListener('resize', () => {
+    if (resizeTicking) return;
+    resizeTicking = true;
+    requestAnimationFrame(() => {
+        resizeCanvas();
+        initParticles();
+        resizeTicking = false;
+    });
+});
 
 window.addEventListener('mousemove', (e) => {
     mouse.x = e.clientX;
@@ -226,7 +236,6 @@ function initParticles() {
     }
 }
 initParticles();
-window.addEventListener('resize', initParticles);
 
 function connectParticles() {
     for (let i = 0; i < particles.length; i++) {
