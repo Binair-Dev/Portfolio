@@ -3,6 +3,8 @@
    JavaScript: Interactions & Animations
    ============================================ */
 
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ===== Typing Effect ===== */
 const typedText = document.getElementById('typed');
 const phrases = [
@@ -40,32 +42,49 @@ function typeEffect() {
         setTimeout(typeEffect, 40);
     }
 }
-typeEffect();
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    typedText.textContent = phrases[0];
+} else {
+    typeEffect();
+}
 
 /* ===== Navbar Scroll ===== */
 const navbar = document.getElementById('navbar');
-let lastScroll = 0;
 
 window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    navbar.classList.toggle('scrolled', scrollY > 50);
-    lastScroll = scrollY;
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
 });
 
 /* ===== Mobile Menu ===== */
 const burger = document.getElementById('navBurger');
 const navLinks = document.getElementById('navLinks');
+const isMobile = () => window.getComputedStyle(burger).display !== 'none';
+
+function closeMenu() {
+    burger.classList.remove('active');
+    navLinks.classList.remove('active');
+    burger.setAttribute('aria-expanded', 'false');
+    burger.setAttribute('aria-label', 'Ouvrir le menu');
+    if (isMobile()) navLinks.setAttribute('aria-hidden', 'true');
+}
 
 burger.addEventListener('click', () => {
-    burger.classList.toggle('active');
-    navLinks.classList.toggle('active');
+    const isOpen = burger.classList.toggle('active');
+    navLinks.classList.toggle('active', isOpen);
+    burger.setAttribute('aria-expanded', String(isOpen));
+    burger.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
+    if (isMobile()) navLinks.setAttribute('aria-hidden', String(!isOpen));
 });
 
 document.querySelectorAll('.nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-        burger.classList.remove('active');
-        navLinks.classList.remove('active');
-    });
+    link.addEventListener('click', closeMenu);
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+        closeMenu();
+        burger.focus();
+    }
 });
 
 /* ===== Scroll Reveal ===== */
@@ -92,6 +111,11 @@ const counterObserver = new IntersectionObserver((entries) => {
         if (entry.isIntersecting) {
             const el = entry.target;
             const target = parseInt(el.dataset.count);
+            if (prefersReducedMotion) {
+                el.textContent = target;
+                counterObserver.unobserve(el);
+                return;
+            }
             let current = 0;
             const increment = target / 40;
             const update = () => {
@@ -116,6 +140,7 @@ const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let particles = [];
 let mouse = { x: null, y: null };
+let animId = null;
 
 function resizeCanvas() {
     canvas.width = window.innerWidth;
@@ -196,9 +221,11 @@ function animateParticles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => { p.update(); p.draw(); });
     connectParticles();
-    requestAnimationFrame(animateParticles);
+    animId = requestAnimationFrame(animateParticles);
 }
-animateParticles();
+if (!prefersReducedMotion) {
+    animateParticles();
+}
 
 /* ===== Active Nav Link on Scroll ===== */
 const sections = document.querySelectorAll('section, header');
