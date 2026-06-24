@@ -57,16 +57,20 @@ img { max-width: 100%; }
     position: fixed;
     top: 0; left: 0;
     z-index: 9999;
-    transform: translateY(-100%);
+    transform: translateY(-200%);
+    opacity: 0;
+    pointer-events: none;
     background: var(--accent);
     color: var(--bg) !important;
     padding: 12px 24px;
     font-weight: 600; font-size: 0.9rem;
     border-radius: 0 0 var(--radius-sm) 0;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease;
 }
 .skip-link:focus {
     transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* ===== Scrollbar ===== */
