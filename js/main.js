@@ -45,14 +45,42 @@ function typeEffect() {
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     typedText.textContent = phrases[0];
 } else {
+    typedText.textContent = '';
     typeEffect();
 }
 
 /* ===== Navbar Scroll ===== */
 const navbar = document.getElementById('navbar');
 
+/* ===== Active Nav Link on Scroll ===== */
+const sections = document.querySelectorAll('section, header');
+const navItems = document.querySelectorAll('.nav-link');
+
+let scrollTicking = false;
 window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 50);
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+
+        navbar.classList.toggle('scrolled', scrollY > 50);
+
+        let current = '';
+        sections.forEach(section => {
+            if (scrollY >= section.offsetTop - 120) {
+                current = section.getAttribute('id');
+            }
+        });
+        navItems.forEach(item => {
+            if (item.getAttribute('href') === `#${current}`) {
+                item.style.color = 'var(--accent)';
+            } else {
+                item.style.color = '';
+            }
+        });
+
+        scrollTicking = false;
+    });
 });
 
 /* ===== Mobile Menu ===== */
@@ -110,12 +138,13 @@ const counterObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const el = entry.target;
-            const target = parseInt(el.dataset.count);
+            const target = parseInt(el.dataset.count, 10);
             if (prefersReducedMotion) {
                 el.textContent = target;
                 counterObserver.unobserve(el);
                 return;
             }
+            el.textContent = '0';
             let current = 0;
             const increment = target / 40;
             const update = () => {
@@ -227,24 +256,11 @@ if (!prefersReducedMotion) {
     animateParticles();
 }
 
-/* ===== Active Nav Link on Scroll ===== */
-const sections = document.querySelectorAll('section, header');
-const navItems = document.querySelectorAll('.nav-link');
-
-window.addEventListener('scroll', () => {
-    let current = '';
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop - 120;
-        if (window.scrollY >= sectionTop) {
-            current = section.getAttribute('id');
-        }
-    });
-    navItems.forEach(item => {
-        item.classList.remove('active-nav');
-        if (item.getAttribute('href') === `#${current}`) {
-            item.style.color = 'var(--accent)';
-        } else {
-            item.style.color = '';
-        }
-    });
+/* ===== Pause Particles on Tab Hidden ===== */
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (animId) { cancelAnimationFrame(animId); animId = null; }
+    } else if (!prefersReducedMotion && !animId) {
+        animateParticles();
+    }
 });
