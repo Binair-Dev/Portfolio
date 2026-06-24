@@ -54,18 +54,19 @@ img { max-width: 100%; }
 
 /* ===== Skip Link (a11y) ===== */
 .skip-link {
-    position: absolute;
-    top: -60px; left: 0;
+    position: fixed;
+    top: 0; left: 0;
     z-index: 9999;
+    transform: translateY(-100%);
     background: var(--accent);
     color: var(--bg) !important;
     padding: 12px 24px;
     font-weight: 600; font-size: 0.9rem;
     border-radius: 0 0 var(--radius-sm) 0;
-    transition: top 0.2s ease;
+    transition: transform 0.2s ease;
 }
 .skip-link:focus {
-    top: 0;
+    transform: translateY(0);
 }
 
 /* ===== Scrollbar ===== */
